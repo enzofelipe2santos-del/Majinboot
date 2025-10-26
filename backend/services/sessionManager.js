@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const qrcode = require('qrcode-terminal');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const settings = require('../../config/settings');
 const logger = require('../utils/logger');
@@ -10,8 +11,35 @@ const analyticsService = require('./analyticsService');
 const sessions = new Map();
 let io;
 
+const sessionsRoot = path.resolve(__dirname, '../../', settings.sessionsDir);
+const authRoot = path.join(sessionsRoot, 'auth');
+
+function ensureDir(dir) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
+ensureDir(sessionsRoot);
+ensureDir(authRoot);
+
 function getSessionDir(sessionId) {
-  return path.join(settings.sessionsDir, sessionId);
+  const dir = path.join(sessionsRoot, sessionId);
+  ensureDir(dir);
+  return dir;
+}
+
+function getConfigPath(sessionId) {
+  return path.join(getSessionDir(sessionId), 'config.json');
+}
+
+function serializeSession(session) {
+  return {
+    id: session.id,
+    name: session.name,
+    status: session.status,
+    paused: session.paused,
+  };
 }
 
 function bindSocket(server) {
@@ -25,35 +53,30 @@ function emit(event, payload) {
 }
 
 function listSessions() {
-  return Array.from(sessions.values()).map((session) => ({
-    id: session.id,
-    name: session.name,
-    status: session.status,
-    paused: session.paused,
-  }));
+  return Array.from(sessions.values()).map(serializeSession);
 }
 
 function loadPersistedSessions() {
-  if (!fs.existsSync(settings.sessionsDir)) return [];
+  if (!fs.existsSync(sessionsRoot)) return [];
   return fs
-    .readdirSync(settings.sessionsDir)
-    .filter((folder) => fs.statSync(path.join(settings.sessionsDir, folder)).isDirectory())
+    .readdirSync(sessionsRoot)
+    .filter((folder) => {
+      const dir = path.join(sessionsRoot, folder);
+      return fs.statSync(dir).isDirectory() && folder !== 'auth';
+    })
     .map((id) => {
-      const configPath = path.join(getSessionDir(id), 'config.json');
+      const configPath = getConfigPath(id);
       if (fs.existsSync(configPath)) {
-        const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-        return config;
+        return JSON.parse(fs.readFileSync(configPath, 'utf8'));
       }
       return { id, name: id, status: 'disconnected', paused: false };
     });
 }
 
 function persistSessionConfig(session) {
-  const dir = getSessionDir(session.id);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  fs.writeFileSync(path.join(dir, 'config.json'), JSON.stringify(session, null, 2));
+  const data = serializeSession(session);
+  const configPath = getConfigPath(session.id);
+  fs.writeFileSync(configPath, JSON.stringify(data, null, 2));
 }
 
 function createSession({ id, name }) {
@@ -62,10 +85,14 @@ function createSession({ id, name }) {
   }
 
   const client = new Client({
-    authStrategy: new LocalAuth({ clientId: id, dataPath: getSessionDir(id) }),
+    authStrategy: new LocalAuth({ clientId: id, dataPath: authRoot }),
     puppeteer: {
       headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     },
+    qrMaxRetries: 6,
+    takeoverOnConflict: true,
+    takeoverTimeoutMs: 60000,
   });
 
   const session = {
@@ -74,22 +101,95 @@ function createSession({ id, name }) {
     status: 'connecting',
     paused: false,
     client,
+    lastQr: null,
   };
 
   sessions.set(id, session);
-  persistSessionConfig({ id, name, status: 'connecting', paused: false });
-  emit('session:created', { id, name });
+  persistSessionConfig(session);
+  emit('session:created', serializeSession(session));
 
   client.on('qr', (qr) => {
+    session.status = 'qr';
+    session.lastQr = qr;
+    persistSessionConfig(session);
+    qrcode.generate(qr, { small: true });
     emit('session:qr', { id, qr });
-    emit('session:log', { id, level: 'info', message: 'QR generado, escanéalo para iniciar sesión.', timestamp: new Date().toISOString() });
+    emit('session:log', {
+      id,
+      level: 'info',
+      message: 'QR generado, escanéalo para iniciar sesión.',
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  client.on('loading_screen', (percent, message) => {
+    emit('session:log', {
+      id,
+      level: 'info',
+      message: `Inicializando (${percent}%): ${message}`,
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  client.on('authenticated', () => {
+    session.status = 'authenticated';
+    persistSessionConfig(session);
+    emit('session:log', {
+      id,
+      level: 'info',
+      message: 'Autenticación completada, esperando confirmación de WhatsApp...',
+      timestamp: new Date().toISOString(),
+    });
   });
 
   client.on('ready', () => {
     session.status = 'ready';
-    persistSessionConfig({ id, name, status: 'ready', paused: false });
-    emit('session:ready', { id });
-    emit('session:log', { id, level: 'info', message: 'Sesión conectada correctamente.', timestamp: new Date().toISOString() });
+    session.lastQr = null;
+    persistSessionConfig(session);
+    emit('session:ready', serializeSession(session));
+    emit('session:log', {
+      id,
+      level: 'info',
+      message: 'Sesión conectada correctamente.',
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  client.on('disconnected', (reason) => {
+    session.status = 'disconnected';
+    persistSessionConfig(session);
+    emit('session:disconnected', { ...serializeSession(session), reason });
+    emit('session:log', {
+      id,
+      level: 'warn',
+      message: `Sesión desconectada (${reason}). Reintentando...`,
+      timestamp: new Date().toISOString(),
+    });
+    setTimeout(() => {
+      client
+        .initialize()
+        .catch((error) => {
+          session.status = 'error';
+          persistSessionConfig(session);
+          emit('session:error', {
+            id,
+            level: 'error',
+            message: error.message,
+            timestamp: new Date().toISOString(),
+          });
+        });
+    }, 2000);
+  });
+
+  client.on('auth_failure', (message) => {
+    session.status = 'auth_failure';
+    persistSessionConfig(session);
+    emit('session:error', {
+      id,
+      level: 'error',
+      message: `Error de autenticación: ${message}`,
+      timestamp: new Date().toISOString(),
+    });
   });
 
   client.on('message', async (message) => {
@@ -97,7 +197,12 @@ function createSession({ id, name }) {
     analyticsService.incrementStat(id, 'messagesReceived');
     const trigger = await triggerService.resolveTrigger(id, message.body);
     if (trigger) {
-    emit('session:log', { id, level: 'info', message: `Trigger ejecutado: ${trigger.name}`, timestamp: new Date().toISOString() });
+      emit('session:log', {
+        id,
+        level: 'info',
+        message: `Trigger ejecutado: ${trigger.name}`,
+        timestamp: new Date().toISOString(),
+      });
       await triggerService.executeResponses(id, trigger, message, client);
       analyticsService.incrementStat(id, 'trigger', trigger.id);
       reminderService.registerInteraction(id, message.from, trigger);
@@ -107,11 +212,18 @@ function createSession({ id, name }) {
   });
 
   client.initialize().catch((error) => {
+    session.status = 'error';
+    persistSessionConfig(session);
     logger.error('Error inicializando sesión', error);
-    emit('session:error', { id, level: 'error', message: error.message, timestamp: new Date().toISOString() });
+    emit('session:error', {
+      id,
+      level: 'error',
+      message: error.message,
+      timestamp: new Date().toISOString(),
+    });
   });
 
-  return session;
+  return serializeSession(session);
 }
 
 async function startSession(id) {
@@ -119,31 +231,48 @@ async function startSession(id) {
   if (!session) {
     const stored = loadPersistedSessions().find((item) => item.id === id);
     if (!stored) throw new Error('Sesión no encontrada');
-    session = createSession(stored);
+    const created = createSession(stored);
+    session = sessions.get(created.id);
   }
+
   session.paused = false;
-  session.status = 'ready';
-  persistSessionConfig({ id: session.id, name: session.name, status: session.status, paused: session.paused });
-  emit('session:resumed', { id });
-  return session;
+  if (session.status === 'disconnected' || session.status === 'error') {
+    session.status = 'connecting';
+    persistSessionConfig(session);
+    session.client.initialize().catch((error) => {
+      session.status = 'error';
+      persistSessionConfig(session);
+      emit('session:error', {
+        id,
+        level: 'error',
+        message: error.message,
+        timestamp: new Date().toISOString(),
+      });
+    });
+  } else {
+    persistSessionConfig(session);
+  }
+
+  emit('session:resumed', serializeSession(session));
+  return serializeSession(session);
 }
 
 function pauseSession(id) {
   const session = sessions.get(id);
   if (!session) throw new Error('Sesión no encontrada');
   session.paused = true;
-  persistSessionConfig({ id: session.id, name: session.name, status: session.status, paused: session.paused });
-  emit('session:paused', { id });
-  return session;
+  persistSessionConfig(session);
+  emit('session:paused', serializeSession(session));
+  return serializeSession(session);
 }
 
 function resumeSession(id) {
   const session = sessions.get(id);
   if (!session) throw new Error('Sesión no encontrada');
   session.paused = false;
-  persistSessionConfig({ id: session.id, name: session.name, status: session.status, paused: session.paused });
-  emit('session:resumed', { id });
-  return session;
+  persistSessionConfig(session);
+  emit('session:resumed', serializeSession(session));
+  return serializeSession(session);
 }
 
 function deleteSession(id) {
@@ -155,6 +284,10 @@ function deleteSession(id) {
   const dir = getSessionDir(id);
   if (fs.existsSync(dir)) {
     fs.rmSync(dir, { recursive: true, force: true });
+  }
+  const authPath = path.join(authRoot, `session-${id}`);
+  if (fs.existsSync(authPath)) {
+    fs.rmSync(authPath, { recursive: true, force: true });
   }
   emit('session:deleted', { id });
 }

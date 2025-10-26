@@ -4,8 +4,12 @@
   "private": true,
   "description": "Aplicación de escritorio para administrar múltiples bots de WhatsApp con Electron, React y Express.",
   "main": "main.js",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
-    "postinstall": "npm install --prefix backend && npm install --prefix frontend",
+    "postinstall": "node scripts/bootstrap.js --skip-root --force",
     "bootstrap": "node scripts/bootstrap.js --force",
     "predev": "node scripts/bootstrap.js",
     "dev": "concurrently -k \"npm:dev:backend\" \"npm:dev:frontend\" \"npm:dev:electron\"",

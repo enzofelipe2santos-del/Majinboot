@@ -27,6 +27,9 @@ npm install --prefix backend
 npm install --prefix frontend
 ```
 
+> Desde esta versión el backend instala automáticamente `chalk@4`, `whatsapp-web.js@1.25.0`, `puppeteer@21` y `qrcode-terminal`,
+> por lo que ya no es necesario agregarlos manualmente tras clonar el repositorio.
+
 > **Nota para Windows:** asegúrate de incluir el espacio antes de `--prefix`. El comando correcto es `npm install --prefix frontend`
 > (con espacio). Si omites ese espacio, `npm` intentará ejecutar un comando inexistente y no instalará Vite ni el resto de
 > dependencias del frontend, provocando errores como `Cannot find package 'vite'` cuando corras `npm run dev`.

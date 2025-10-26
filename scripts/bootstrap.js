@@ -9,21 +9,24 @@ const steps = [
   {
     label: 'root workspace',
     cwd: rootDir,
-    packages: ['electron', 'concurrently'],
+    packages: ['electron', 'concurrently', 'cross-env', 'wait-on'],
   },
   {
     label: 'backend',
     cwd: join(rootDir, 'backend'),
-    packages: ['express', 'cron'],
+    packages: ['express', 'whatsapp-web.js', 'puppeteer', 'chalk'],
   },
   {
     label: 'frontend',
     cwd: join(rootDir, 'frontend'),
-    packages: ['vite'],
+    packages: ['vite', 'react', 'tailwindcss'],
   },
 ];
 
 const force = process.argv.includes('--force');
+const skipRoot = process.argv.includes('--skip-root');
+
+const selectedSteps = skipRoot ? steps.filter((step) => step.cwd !== rootDir) : steps;
 
 function packageInstalled(step) {
   if (!existsSync(join(step.cwd, 'node_modules'))) {
@@ -51,7 +54,7 @@ function install(step) {
   }
 }
 
-for (const step of steps) {
+for (const step of selectedSteps) {
   const needsInstall = force || !packageInstalled(step);
 
   if (!needsInstall) {
