@@ -1,0 +1,24 @@
+{
+  "name": "majinboot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aplicación de escritorio para administrar múltiples bots de WhatsApp con Electron, React y Express.",
+  "main": "main.js",
+  "scripts": {
+    "postinstall": "npm install --prefix backend && npm install --prefix frontend",
+    "dev": "concurrently -k \"npm:dev:backend\" \"npm:dev:frontend\" \"npm:dev:electron\"",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:electron": "wait-on tcp:5173 && cross-env FRONTEND_URL=http://localhost:5173 electron .",
+    "build": "npm run build --prefix frontend",
+    "lint": "npm run lint --prefix frontend"
+  },
+  "author": "Equipo Majinboot",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "8.2.2",
+    "cross-env": "7.0.3",
+    "electron": "27.0.0",
+    "wait-on": "7.2.0"
+  }
+}
