@@ -23,6 +23,21 @@ npm install --prefix frontend
 > (con espacio). Si omites ese espacio, `npm` intentará ejecutar un comando inexistente y no instalará Vite ni el resto de
 > dependencias del frontend, provocando errores como `Cannot find package 'vite'` cuando corras `npm run dev`.
 
+### Si ya viste el error `Cannot find package 'vite'`
+1. Vuelve a la raíz del proyecto (`Majinboot/`).
+2. Ejecuta nuevamente la instalación asegurándote de escribir el espacio en el comando:
+   ```bash
+   npm install --prefix frontend
+   ```
+3. Comprueba que se haya creado la carpeta `frontend/node_modules`. Si el comando vuelve a fallar, elimina la carpeta temporal
+   que crea Vite y repite la instalación:
+   ```bash
+   rmdir /s /q frontend\\node_modules\\.vite-temp  # En PowerShell
+   npm install --prefix frontend
+   ```
+4. Una vez instaladas las dependencias, corre `npm run dev` desde la raíz. Si seguía abierto el proceso anterior, deténlo con
+   `Ctrl + C` antes de lanzar el comando.
+
 ## Desarrollo
 ```bash
 npm run dev
