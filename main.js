@@ -3,7 +3,6 @@ const { app, BrowserWindow, nativeTheme, ipcMain, Notification } = require('elec
 const isDev = !app.isPackaged;
 const settings = require('./config/settings');
 const { ensureDirectories } = require('./backend/utils/fileSystem');
-const { scheduleAutomaticBackups } = require('./backend/utils/backupManager');
 
 /**
  * Creates the main renderer window for Majinboot.
@@ -39,7 +38,6 @@ function createWindow() {
 
 app.whenReady().then(async () => {
   ensureDirectories();
-  scheduleAutomaticBackups();
   createWindow();
 
   app.on('activate', () => {

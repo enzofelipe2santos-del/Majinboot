@@ -6,6 +6,10 @@ const settings = require('../config/settings');
 const routes = require('./routes');
 const sessionManager = require('./services/sessionManager');
 const logger = require('./utils/logger');
+const { ensureDirectories } = require('./utils/fileSystem');
+const { scheduleAutomaticBackups } = require('./utils/backupManager');
+
+ensureDirectories();
 
 const app = express();
 app.use(cors());
@@ -27,6 +31,8 @@ sessionManager.loadPersistedSessions().forEach((session) => {
     logger.warn(`No se pudo iniciar sesión persistida ${session.id}: ${error.message}`);
   }
 });
+
+scheduleAutomaticBackups();
 
 server.listen(settings.app.backendPort, () => {
   logger.info(`API disponible en http://localhost:${settings.app.backendPort}`);

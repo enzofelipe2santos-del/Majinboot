@@ -34,7 +34,7 @@ npm install --prefix frontend
 > (con espacio). Si omites ese espacio, `npm` intentará ejecutar un comando inexistente y no instalará Vite ni el resto de
 > dependencias del frontend, provocando errores como `Cannot find package 'vite'` cuando corras `npm run dev`.
 
-### Si ya viste el error `Cannot find package 'vite'` o `Cannot find module 'express'`
+### Si ya viste el error `Cannot find package 'vite'`, `Cannot find module 'express'` o `Cannot find module 'cron'`
 1. Vuelve a la raíz del proyecto (`Majinboot/`).
 2. Ejecuta el script de bootstrap para reinstalar automáticamente backend y frontend:
    ```bash
@@ -46,8 +46,10 @@ npm install --prefix frontend
    rmdir /s /q frontend\\node_modules\\.vite-temp  # En PowerShell
    npm run bootstrap
    ```
-4. Una vez instaladas las dependencias, corre `npm run dev` desde la raíz. Si seguía abierto el proceso anterior, deténlo con
-   `Ctrl + C` antes de lanzar el comando.
+4. Una vez instaladas las dependencias, corre `npm run dev` **desde la raíz del repositorio**. Si seguía abierto el proceso
+   anterior, deténlo con `Ctrl + C` antes de lanzar el comando. Ejecutar `npm run dev` dentro de `backend/` levantará solo la API
+   y provocará errores como `Cannot find module 'C:\\ruta\\index.js'` porque la aplicación de escritorio espera que Electron
+   esté en funcionamiento.
 
 ## Desarrollo
 ```bash

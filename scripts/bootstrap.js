@@ -14,7 +14,15 @@ const steps = [
   {
     label: 'backend',
     cwd: join(rootDir, 'backend'),
-    packages: ['express', 'whatsapp-web.js', 'puppeteer', 'chalk'],
+    packages: [
+      'express',
+      'whatsapp-web.js',
+      'puppeteer',
+      'chalk',
+      'cron',
+      'socket.io',
+      'qrcode-terminal',
+    ],
   },
   {
     label: 'frontend',
