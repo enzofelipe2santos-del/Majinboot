@@ -5,6 +5,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
+    "bootstrap": "node ../scripts/bootstrap.js --skip-root --force",
     "dev": "nodemon index.js",
     "start": "node index.js"
   },

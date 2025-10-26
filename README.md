@@ -19,8 +19,9 @@ bootstrap para asegurar que todo quede sincronizado:
 npm run bootstrap
 ```
 
-Este comando revisa las carpetas `backend/` y `frontend/` y descarga lo que falte. También puedes lanzar manualmente las
-instalaciones independientes si lo deseas:
+Este comando revisa las carpetas `backend/` y `frontend/` y descarga lo que falte. Si ya te encuentras dentro de
+`backend/` o `frontend/`, también dispones del mismo alias (`npm run bootstrap`) para reinstalar desde allí sin volver a la
+raíz. Además puedes lanzar manualmente las instalaciones independientes si lo deseas:
 
 ```bash
 npm install --prefix backend
