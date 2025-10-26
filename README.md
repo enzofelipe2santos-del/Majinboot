@@ -12,7 +12,15 @@ npm install
 ```
 
 Durante la instalación principal se ejecutará automáticamente la descarga de las dependencias del backend y del frontend
-(gracias al script `postinstall`). Si prefieres hacerlo manualmente o si interrumpes el proceso, puedes ejecutar:
+(gracias al script `postinstall`). Si prefieres forzar la instalación o vienes de un archivo `.zip`, ejecuta el script de
+bootstrap para asegurar que todo quede sincronizado:
+
+```bash
+npm run bootstrap
+```
+
+Este comando revisa las carpetas `backend/` y `frontend/` y descarga lo que falte. También puedes lanzar manualmente las
+instalaciones independientes si lo deseas:
 
 ```bash
 npm install --prefix backend
@@ -23,17 +31,17 @@ npm install --prefix frontend
 > (con espacio). Si omites ese espacio, `npm` intentará ejecutar un comando inexistente y no instalará Vite ni el resto de
 > dependencias del frontend, provocando errores como `Cannot find package 'vite'` cuando corras `npm run dev`.
 
-### Si ya viste el error `Cannot find package 'vite'`
+### Si ya viste el error `Cannot find package 'vite'` o `Cannot find module 'express'`
 1. Vuelve a la raíz del proyecto (`Majinboot/`).
-2. Ejecuta nuevamente la instalación asegurándote de escribir el espacio en el comando:
+2. Ejecuta el script de bootstrap para reinstalar automáticamente backend y frontend:
    ```bash
-   npm install --prefix frontend
+   npm run bootstrap
    ```
-3. Comprueba que se haya creado la carpeta `frontend/node_modules`. Si el comando vuelve a fallar, elimina la carpeta temporal
-   que crea Vite y repite la instalación:
+3. Comprueba que existan las carpetas `backend/node_modules` y `frontend/node_modules`. Si el comando vuelve a fallar, elimina
+   la carpeta temporal que crea Vite y repite la instalación forzada:
    ```bash
    rmdir /s /q frontend\\node_modules\\.vite-temp  # En PowerShell
-   npm install --prefix frontend
+   npm run bootstrap
    ```
 4. Una vez instaladas las dependencias, corre `npm run dev` desde la raíz. Si seguía abierto el proceso anterior, deténlo con
    `Ctrl + C` antes de lanzar el comando.
@@ -47,6 +55,9 @@ Este comando levanta simultáneamente:
 - Backend Express en `http://localhost:4010`
 - Frontend Vite en `http://localhost:5173`
 - Shell de Electron apuntando al frontend
+
+Previo al arranque se ejecuta automáticamente `node scripts/bootstrap.js`, que verifica y reinstala las dependencias faltantes
+para evitar errores de módulos inexistentes.
 
 ## Estructura
 ```
