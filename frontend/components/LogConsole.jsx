@@ -24,14 +24,17 @@ export default function LogConsole({ sessionId }) {
   }, [socket, sessionId]);
 
   return (
-    <motion.div className="glass-card p-4 space-y-3" layout>
+    <motion.div className="glass-card p-4 space-y-3 bg-gradient-to-br from-white/90 via-pearl/70 to-lavender/50" layout>
       <div>
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Logs en tiempo real</h3>
+        <h3 className="text-lg font-semibold text-slate-700 dark:text-white">Logs en tiempo real</h3>
         <p className="text-xs text-slate-500 dark:text-slate-300">Seguimiento detallado de eventos por sesión.</p>
       </div>
-      <div className="glass-card p-4 h-48 overflow-y-auto scrollbar-thin text-xs font-mono space-y-2">
+      <div className="glass-card p-4 h-48 overflow-y-auto scrollbar-thin text-xs font-mono space-y-2 bg-gradient-to-br from-white/85 via-pearl/70 to-mint/40">
         {logs.map((log, index) => (
-          <div key={`${log.message}-${index}`} className={`flex items-center gap-2 ${log.level === 'info' ? 'text-emerald-400' : 'text-red-400'}`}>
+          <div
+            key={`${log.message}-${index}`}
+            className={`flex items-center gap-2 ${log.level === 'info' ? 'text-emerald-500' : 'text-rose-500'}`}
+          >
             <span>{new Date(log.timestamp || Date.now()).toLocaleTimeString()}</span>
             <span className="uppercase">{log.level}</span>
             <span>{log.message}</span>

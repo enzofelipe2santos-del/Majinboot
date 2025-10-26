@@ -13,15 +13,19 @@ export default {
         sans: ['Inter', 'SF Pro Display', 'system-ui', 'sans-serif'],
       },
       colors: {
-        frost: '#e5f0ff',
+        pearl: '#f7faff',
+        blush: '#fdecef',
+        lavender: '#e7e0ff',
+        lilac: '#c7d2ff',
+        mint: '#d7f5ef',
+        sky: '#a5d8ff',
         midnight: '#101522',
-        sky: '#7fd1ff',
       },
       backdropBlur: {
         glass: '20px',
       },
       boxShadow: {
-        glass: '0 20px 45px rgba(15, 35, 95, 0.15)',
+        glass: '0 28px 60px -30px rgba(134, 154, 255, 0.45)',
       },
     },
   },

@@ -23,28 +23,28 @@ export default function StatsPanel({ sessionId }) {
     : [];
 
   return (
-    <motion.div className="glass-card p-6" layout>
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Estadísticas</h3>
+    <motion.div className="glass-card p-6 bg-gradient-to-br from-white/90 via-pearl/70 to-mint/40" layout>
+      <h3 className="text-lg font-semibold text-slate-700 dark:text-white mb-2">Estadísticas</h3>
       {stats ? (
         <div className="grid grid-cols-3 gap-4">
-          <div className="glass-card p-4">
+          <div className="glass-card p-4 bg-gradient-to-r from-white/85 via-pearl/70 to-lavender/50">
             <p className="text-xs text-slate-500">Mensajes recibidos</p>
-            <p className="text-2xl font-semibold text-slate-900 dark:text-white">{stats.messagesReceived}</p>
+            <p className="text-2xl font-semibold text-slate-700 dark:text-white">{stats.messagesReceived}</p>
           </div>
-          <div className="glass-card p-4">
+          <div className="glass-card p-4 bg-gradient-to-r from-white/85 via-mint/60 to-sky/40">
             <p className="text-xs text-slate-500">Mensajes enviados</p>
-            <p className="text-2xl font-semibold text-slate-900 dark:text-white">{stats.messagesSent}</p>
+            <p className="text-2xl font-semibold text-slate-700 dark:text-white">{stats.messagesSent}</p>
           </div>
-          <div className="glass-card p-4">
+          <div className="glass-card p-4 bg-gradient-to-r from-white/85 via-lilac/60 to-pearl/50">
             <p className="text-xs text-slate-500">Triggers activos</p>
-            <p className="text-2xl font-semibold text-slate-900 dark:text-white">{chartData.length}</p>
+            <p className="text-2xl font-semibold text-slate-700 dark:text-white">{chartData.length}</p>
           </div>
           <div className="col-span-3 h-40">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
                 <XAxis dataKey="triggerId" stroke="#94a3b8" fontSize={12} />
-                <Tooltip />
-                <Bar dataKey="count" fill="#7fd1ff" radius={[12, 12, 12, 12]} />
+                <Tooltip contentStyle={{ borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.9)', border: 'none', boxShadow: '0 20px 45px -30px rgba(134,154,255,0.45)' }} />
+                <Bar dataKey="count" fill="#a5d8ff" radius={[12, 12, 12, 12]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

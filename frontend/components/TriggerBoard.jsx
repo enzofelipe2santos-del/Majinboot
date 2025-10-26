@@ -35,10 +35,10 @@ export default function TriggerBoard({ sessionId }) {
   };
 
   return (
-    <motion.div className="glass-card p-6 flex flex-col gap-6" layout>
+    <motion.div className="glass-card p-6 flex flex-col gap-6 bg-gradient-to-br from-white/90 via-pearl/70 to-lavender/50" layout>
       <header className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Triggers</h2>
+          <h2 className="text-xl font-semibold text-slate-700 dark:text-white">Triggers</h2>
           <p className="text-sm text-slate-500 dark:text-slate-300">Gestiona palabras clave y respuestas multimedia.</p>
         </div>
       </header>
@@ -53,9 +53,9 @@ export default function TriggerBoard({ sessionId }) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 onClick={() => setSelectedTrigger(trigger)}
-                className={`w-full text-left p-4 rounded-2xl glass-card transition ${selectedTrigger?.id === trigger.id ? 'ring-2 ring-sky/70' : ''}`}
+                className={`w-full text-left p-4 rounded-2xl bg-gradient-to-r from-white/85 via-pearl/70 to-lilac/50 transition shadow-[0_18px_40px_-32px_rgba(164,178,255,0.65)] ${selectedTrigger?.id === trigger.id ? 'ring-2 ring-lilac/60 scale-[1.01]' : 'hover:scale-[1.01]'}`}
               >
-                <p className="text-sm font-semibold text-slate-900 dark:text-white">{trigger.name}</p>
+                <p className="text-sm font-semibold text-slate-700 dark:text-white">{trigger.name}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-300 line-clamp-2">{trigger.match}</p>
               </motion.button>
             ))}
@@ -63,25 +63,25 @@ export default function TriggerBoard({ sessionId }) {
         </div>
         <div className="col-span-8">
           {selectedTrigger ? (
-            <div className="glass-card p-6 space-y-4">
+            <div className="glass-card p-6 space-y-4 bg-gradient-to-br from-white/90 via-lavender/40 to-pearl/60">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs uppercase text-slate-500 dark:text-slate-400">Coincidencia</p>
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{selectedTrigger.match}</h3>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Coincidencia</p>
+                  <h3 className="text-lg font-semibold text-slate-700 dark:text-white">{selectedTrigger.match}</h3>
                 </div>
                 <span className="text-xs text-slate-500 dark:text-slate-300">Similitud: {(selectedTrigger.similarity * 100).toFixed(0)}%</span>
               </div>
               <div>
-                <p className="text-xs uppercase text-slate-500 dark:text-slate-400 mb-2">Respuestas</p>
+                <p className="text-xs uppercase text-slate-400 mb-2 tracking-[0.3em]">Respuestas</p>
                 <Reorder.Group axis="y" values={selectedTrigger.responses || []} onReorder={handleReorder} className="space-y-3">
                   {(selectedTrigger.responses || []).map((response) => (
                     <Reorder.Item
                       key={response.id || response.path || response.content}
                       value={response}
-                      className="glass-card p-4 flex items-center justify-between"
+                      className="glass-card p-4 flex items-center justify-between bg-gradient-to-r from-white/90 via-pearl/70 to-mint/50"
                     >
                       <div>
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white capitalize">{response.type}</p>
+                        <p className="text-sm font-semibold text-slate-700 dark:text-white capitalize">{response.type}</p>
                         <p className="text-xs text-slate-500 dark:text-slate-300 truncate">
                           {response.type === 'text' ? response.content : response.path}
                         </p>
@@ -94,7 +94,9 @@ export default function TriggerBoard({ sessionId }) {
               <FileDropZone sessionId={sessionId} triggerId={selectedTrigger.id} onUploaded={loadTriggers} />
             </div>
           ) : (
-            <div className="glass-card p-6 text-slate-500 dark:text-slate-300">Selecciona un trigger para editarlo.</div>
+            <div className="glass-card p-6 text-slate-500 dark:text-slate-300 bg-gradient-to-br from-white/85 via-pearl/70 to-lilac/40">
+              Selecciona un trigger para editarlo.
+            </div>
           )}
         </div>
       </div>

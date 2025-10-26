@@ -1,12 +1,18 @@
 const sessionManager = require('../services/sessionManager');
+const reminderService = require('../services/reminderService');
 
 exports.listSessions = (req, res) => {
   const sessions = sessionManager.listSessions();
   const persisted = sessionManager.loadPersistedSessions();
-  const merged = persisted.map((session) => ({
-    ...session,
-    ...(sessions.find((item) => item.id === session.id) || {}),
-  }));
+  const merged = persisted.map((session) => {
+    const runtime = sessions.find((item) => item.id === session.id) || {};
+    const remindersCount = reminderService.listReminders(session.id).length;
+    return {
+      ...session,
+      ...runtime,
+      remindersCount,
+    };
+  });
   res.json(merged);
 };
 

@@ -7,13 +7,16 @@ export default function Sidebar({ sessions, selectedId, onSelect, onCreate }) {
       initial={{ x: -30, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="glass-card p-6 w-72 flex flex-col gap-4"
+      className="glass-card p-6 w-72 flex flex-col gap-5 bg-gradient-to-br from-pearl/80 via-white/80 to-lavender/60"
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Sesiones</h2>
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.35em] text-slate-400">Control</p>
+          <h2 className="text-xl font-semibold text-slate-700 dark:text-white">Sesiones</h2>
+        </div>
         <button
           onClick={onCreate}
-          className="p-2 rounded-full bg-sky/40 text-slate-800 dark:text-sky-100 hover:bg-sky/60 transition"
+          className="p-2 rounded-full bg-gradient-to-br from-mint/70 to-sky/60 text-slate-700 hover:shadow-glass transition-transform hover:-translate-y-0.5"
         >
           <FiPlus />
         </button>
@@ -23,13 +26,13 @@ export default function Sidebar({ sessions, selectedId, onSelect, onCreate }) {
           <button
             key={session.id}
             onClick={() => onSelect(session.id)}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition glass-card ${selectedId === session.id ? 'ring-2 ring-sky/70' : 'opacity-80 hover:opacity-100'}`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all bg-gradient-to-r from-white/80 via-pearl/70 to-lilac/50 shadow-[0_16px_40px_-30px_rgba(134,154,255,0.6)] ${selectedId === session.id ? 'ring-2 ring-lilac/60 scale-[1.02]' : 'opacity-85 hover:opacity-100 hover:scale-[1.01]'}`}
           >
-            <div className="p-2 rounded-full bg-white/40 dark:bg-slate-800/60">
-              <FiMessageCircle className="text-sky-600" />
+            <div className="p-2 rounded-full bg-white/70">
+              <FiMessageCircle className="text-lilac-500" />
             </div>
             <div className="text-left">
-              <p className="text-sm font-medium text-slate-900 dark:text-white">{session.name}</p>
+              <p className="text-sm font-medium text-slate-700 dark:text-white">{session.name}</p>
               <p className="text-xs text-slate-500 dark:text-slate-300 capitalize">{session.status || 'desconectado'}</p>
             </div>
           </button>

@@ -7,6 +7,7 @@ const API_URL = 'http://localhost:4010/api';
 export default function useSessions() {
   const [sessions, setSessions] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
+  const [qrCodes, setQrCodes] = useState({});
   const socket = useSocket();
 
   const refreshSessions = useCallback(async () => {
@@ -25,8 +26,29 @@ export default function useSessions() {
     if (!socket) return;
     const events = ['session:created', 'session:ready', 'session:deleted', 'session:paused', 'session:resumed'];
     events.forEach((event) => socket.on(event, refreshSessions));
+
+    const handleQr = ({ id, qr }) => {
+      setQrCodes((prev) => ({ ...prev, [id]: qr }));
+    };
+
+    const clearQr = ({ id }) => {
+      setQrCodes((prev) => {
+        if (!prev[id]) return prev;
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    };
+
+    socket.on('session:qr', handleQr);
+    socket.on('session:ready', clearQr);
+    socket.on('session:deleted', clearQr);
+
     return () => {
       events.forEach((event) => socket.off(event, refreshSessions));
+      socket.off('session:qr', handleQr);
+      socket.off('session:ready', clearQr);
+      socket.off('session:deleted', clearQr);
     };
   }, [socket, refreshSessions]);
 
@@ -38,5 +60,6 @@ export default function useSessions() {
     selectedId,
     setSelectedId,
     refreshSessions,
+    qrCodes,
   };
 }

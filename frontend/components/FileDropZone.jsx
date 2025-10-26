@@ -20,11 +20,11 @@ export default function FileDropZone({ onUploaded }) {
   return (
     <div
       {...getRootProps()}
-      className={`glass-card p-6 border-2 border-dashed ${isDragging ? 'border-sky-400 bg-sky/20' : 'border-white/50'}`}
+      className={`glass-card p-6 border-2 border-dashed bg-gradient-to-br from-white/85 via-pearl/70 to-lavender/40 ${isDragging ? 'border-sky-300 shadow-glass' : 'border-white/60'}`}
     >
       <input {...getInputProps()} />
       <div className="flex items-center gap-3 text-slate-600 dark:text-slate-200">
-        <FiUploadCloud className="text-2xl" />
+        <FiUploadCloud className={`text-2xl ${isDragging ? 'text-sky-500' : 'text-lilac-500'}`} />
         <div>
           <p className="text-sm font-semibold">Arrastra archivos multimedia</p>
           <p className="text-xs">Imágenes, videos, audios o PDFs</p>
